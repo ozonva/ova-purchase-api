@@ -17,11 +17,14 @@ func Split(input []int, size int) ([][]int, error) {
 		return nil, errors.New("size must be positive")
 	}
 	batches := int(math.Ceil(float64(len(input)) / float64(size)))
-	result := make([][]int, 0)
+	result := make([][]int, 0, batches)
 	for i := 0; i < batches; i++ {
 		left := i * size
 		right := min(len(input), left+size)
-		result = append(result, input[left:right])
+		source := input[left:right]
+		buf := make([]int, len(source))
+		copy(buf, source)
+		result = append(result, buf)
 	}
 	return result, nil
 }

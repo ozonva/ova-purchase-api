@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"reflect"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -11,13 +11,9 @@ func TestSplitNotFullSuccess(t *testing.T) {
 
 	actual, err := Split(items, 3)
 
-	if err != nil {
-		t.Fatalf("Error %s not expected", err)
-	}
+	require.NoError(t, err)
 
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("\nActual:%v\nExpect:%v", actual, expected)
-	}
+	require.Equal(t, actual, expected)
 }
 
 func TestSplitFullSuccess(t *testing.T) {
@@ -26,23 +22,19 @@ func TestSplitFullSuccess(t *testing.T) {
 
 	actual, err := Split(items, 2)
 
-	if err != nil {
-		t.Fatalf("Error %s not expected", err)
-	}
+	require.NoError(t, err)
 
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("\nActual:%v\nExpect:%v", actual, expected)
-	}
+	require.Equal(t, actual, expected)
 }
 
 func TestSplitFailure(t *testing.T) {
 	items := []int{1, 2, 3, 4}
 
-	_, err := Split(items, 0)
+	val, err := Split(items, 0)
 
-	if err == nil {
-		t.Fatal("Error expected")
-	}
+	require.Nil(t, val)
+
+	require.Error(t, err)
 }
 
 func TestSplitEmpty(t *testing.T) {
@@ -50,13 +42,9 @@ func TestSplitEmpty(t *testing.T) {
 
 	actual, err := Split(items, 5)
 
-	if err != nil {
-		t.Fatalf("Error %s not expected", err)
-	}
+	require.NoError(t, err)
 
-	if len(actual) != 0 {
-		t.Fatal("Expected empty slice")
-	}
+	require.Len(t, actual, 0)
 }
 
 func TestFilterSuccess(t *testing.T) {
@@ -65,9 +53,7 @@ func TestFilterSuccess(t *testing.T) {
 
 	actual := Filter(items, []int{3, 7})
 
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("\nActual:%v\nExpect:%v", actual, expected)
-	}
+	require.Equal(t, actual, expected)
 }
 
 func TestFilterWithoutExcludeSuccess(t *testing.T) {
@@ -76,9 +62,7 @@ func TestFilterWithoutExcludeSuccess(t *testing.T) {
 
 	actual := Filter(items, nil)
 
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("\nActual:%v\nExpect:%v", actual, expected)
-	}
+	require.Equal(t, actual, expected)
 }
 
 func TestReverseSuccess(t *testing.T) {
@@ -86,22 +70,16 @@ func TestReverseSuccess(t *testing.T) {
 	expected := map[string]string{"second": "first", "2": "1", "test-3": "test-1"}
 
 	actual, err := Reverse(items)
-
-	if err != nil {
-		t.Fatalf("Error %s not expected", err)
-	}
-
-	if !reflect.DeepEqual(actual, expected) {
-		t.Fatalf("\nActual:%v\nExpect:%v", actual, expected)
-	}
+	require.NoError(t, err)
+	require.Equal(t, actual, expected)
 }
 
 func TestReverseFailure(t *testing.T) {
 	items := map[string]string{"first": "second", "third": "second"}
 
-	_, err := Reverse(items)
+	val, err := Reverse(items)
 
-	if err == nil {
-		t.Fatal("Error expected")
-	}
+	require.Nil(t, val)
+
+	require.Error(t, err)
 }
