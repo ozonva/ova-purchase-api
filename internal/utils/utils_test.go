@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/ozonva/ova-purchase-api/internal/purchase"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -45,6 +46,40 @@ func TestSplitEmpty(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, actual, 0)
+}
+
+func TestSplitToBulks(t *testing.T) {
+	p1 := purchase.New()
+	p1.Id = 1
+	p2 := purchase.New()
+	p2.Id = 2
+	p3 := purchase.New()
+	p3.Id = 3
+
+	items := []purchase.Purchase{p1, p2, p3}
+	expected := [][]purchase.Purchase{{p1, p2}, {p3}}
+	result, err := SplitToBulks(items, 2)
+
+	require.NoError(t, err)
+	require.Equal(t, expected, result)
+}
+
+func TestToMap(t *testing.T) {
+	p1 := purchase.New()
+	p1.Id = 1
+	p2 := purchase.New()
+	p2.Id = 2
+	p3 := purchase.New()
+	p3.Id = 3
+
+	expected := map[uint64]purchase.Purchase{1: p1, 2: p2, 3: p3}
+
+	items := []purchase.Purchase{p1, p2, p3}
+	result, err := ToMap(items)
+
+	require.NoError(t, err)
+
+	require.Equal(t, expected, result)
 }
 
 func TestFilterSuccess(t *testing.T) {
