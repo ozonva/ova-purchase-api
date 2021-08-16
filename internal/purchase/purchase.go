@@ -1,11 +1,9 @@
 package purchase
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/shopspring/decimal"
-	"log"
 	"time"
 )
 
@@ -63,11 +61,15 @@ func (s *Purchase) calculateTotal() {
 }
 
 func (s *Purchase) String() string {
-	bytes, err := json.Marshal(s)
-	if err != nil {
-		log.Fatal("can't marshal purchase")
-	}
-	return fmt.Sprintf("Purchase(%s)", string(bytes))
+	return fmt.Sprintf(`Purchase({
+	ID:        %d
+	UserID:    %d
+	Total: 	   %s
+	CreatedAt: %s
+	UpdatedAt: %s
+	Status:    %d
+	Items:     %v
+})`, s.Id, s.UserID, s.Total.String(), s.CreatedAt.String(), s.UpdatedAt.String(), s.Status, s.Items)
 }
 
 func (s *Purchase) Add(item Item) (bool, error) {
@@ -103,6 +105,7 @@ func (s *Purchase) Remove(itemId uint64) (bool, error) {
 			if v.Quantity > 1 {
 				s.Items[k].Quantity = v.Quantity - 1
 				s.UpdatedAt = time.Now()
+				break
 			} else {
 				index = k
 				break
@@ -110,10 +113,7 @@ func (s *Purchase) Remove(itemId uint64) (bool, error) {
 		}
 	}
 	if index != -1 {
-		items := make([]Item, 0, len(s.Items)-1)
-		items = append(items, s.Items[:index]...)
-		items = append(items, s.Items[index+1:]...)
-		s.Items = items
+		s.Items = append(s.Items[:index], s.Items[index+1:]...)
 		s.UpdatedAt = time.Now()
 	}
 	s.calculateTotal()

@@ -5,14 +5,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
 
 func TestPurchase_NewPurchase(t *testing.T) {
 	first := New()
 
-	require.NotNil(t, first)
+	require.NotEqual(t, Purchase{}, first)
 	require.NotNil(t, first.Items)
-	require.NotNil(t, first.CreatedAt)
+	require.NotEqual(t, time.Time{}, first.CreatedAt)
 
 	require.Equal(t, decimal.Zero, first.Total)
 	require.Equal(t, Created, first.Status)
