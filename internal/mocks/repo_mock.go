@@ -35,9 +35,9 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 }
 
 // AddEntities mocks base method.
-func (m *MockRepo) AddEntities(entities []purchase.Purchase) error {
+func (m *MockRepo) AddPurchases(entities []purchase.Purchase) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddEntities", entities)
+	ret := m.ctrl.Call(m, "AddPurchases", entities)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
@@ -45,13 +45,13 @@ func (m *MockRepo) AddEntities(entities []purchase.Purchase) error {
 // AddEntities indicates an expected call of AddEntities.
 func (mr *MockRepoMockRecorder) AddEntities(entities interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddEntities", reflect.TypeOf((*MockRepo)(nil).AddEntities), entities)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPurchases", reflect.TypeOf((*MockRepo)(nil).AddPurchases), entities)
 }
 
 // DescribeEntity mocks base method.
-func (m *MockRepo) DescribeEntity(entityId uint64) (*purchase.Purchase, error) {
+func (m *MockRepo) DescribePurchase(entityId uint64) (*purchase.Purchase, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DescribeEntity", entityId)
+	ret := m.ctrl.Call(m, "DescribePurchase", entityId)
 	ret0, _ := ret[0].(*purchase.Purchase)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -60,13 +60,13 @@ func (m *MockRepo) DescribeEntity(entityId uint64) (*purchase.Purchase, error) {
 // DescribeEntity indicates an expected call of DescribeEntity.
 func (mr *MockRepoMockRecorder) DescribeEntity(entityId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeEntity", reflect.TypeOf((*MockRepo)(nil).DescribeEntity), entityId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribePurchase", reflect.TypeOf((*MockRepo)(nil).DescribePurchase), entityId)
 }
 
 // ListEntities mocks base method.
-func (m *MockRepo) ListEntities(limit, offset uint64) ([]purchase.Purchase, error) {
+func (m *MockRepo) ListPurchases(limit, offset uint64) ([]purchase.Purchase, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListEntities", limit, offset)
+	ret := m.ctrl.Call(m, "ListPurchases", limit, offset)
 	ret0, _ := ret[0].([]purchase.Purchase)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -75,5 +75,5 @@ func (m *MockRepo) ListEntities(limit, offset uint64) ([]purchase.Purchase, erro
 // ListEntities indicates an expected call of ListEntities.
 func (mr *MockRepoMockRecorder) ListEntities(limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEntities", reflect.TypeOf((*MockRepo)(nil).ListEntities), limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPurchases", reflect.TypeOf((*MockRepo)(nil).ListPurchases), limit, offset)
 }

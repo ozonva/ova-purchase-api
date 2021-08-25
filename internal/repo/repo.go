@@ -4,7 +4,7 @@ import "github.com/ozonva/ova-purchase-api/internal/purchase"
 
 // Repo - интерфейс хранилища для сущности
 type Repo interface {
-	AddEntities(entities []purchase.Purchase) error
-	ListEntities(limit, offset uint64) ([]purchase.Purchase, error)
-	DescribeEntity(entityId uint64) (*purchase.Purchase, error)
+	AddPurchases(purchases []purchase.Purchase) error
+	ListPurchases(limit, offset uint64) ([]purchase.Purchase, error)
+	DescribePurchase(purchaseId uint64) (*purchase.Purchase, error)
 }
