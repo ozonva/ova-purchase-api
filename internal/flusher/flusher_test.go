@@ -5,18 +5,18 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	mock_repo "github.com/ozonva/ova-purchase-api/internal/mocks"
+	"github.com/ozonva/ova-purchase-api/internal/mocks"
 	"github.com/ozonva/ova-purchase-api/internal/purchase"
 )
 
 var _ = Describe("Flusher", func() {
 	var (
-		repoMock  *mock_repo.MockRepo
+		repoMock  *mocks.MockRepo
 		purchases []purchase.Purchase
 	)
 	BeforeEach(func() {
 		ctrl := gomock.NewController(GinkgoT())
-		repoMock = mock_repo.NewMockRepo(ctrl)
+		repoMock = mocks.NewMockRepo(ctrl)
 		defer ctrl.Finish()
 
 		purchases = []purchase.Purchase{
@@ -30,8 +30,8 @@ var _ = Describe("Flusher", func() {
 				flusherInstance := NewFlusher(2, repoMock)
 
 				gomock.InOrder(
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[0:2])).Return(nil),
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[2:3])).Return(nil),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[0:2])).Return(nil),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[2:3])).Return(nil),
 				)
 
 				Expect(flusherInstance.Flush(purchases) == nil).To(BeTrue())
@@ -43,7 +43,7 @@ var _ = Describe("Flusher", func() {
 				flusherInstance := NewFlusher(3, repoMock)
 
 				gomock.InOrder(
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[0:3])).Return(nil),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[0:3])).Return(nil),
 				)
 
 				Expect(flusherInstance.Flush(purchases) == nil).To(BeTrue())
@@ -55,7 +55,7 @@ var _ = Describe("Flusher", func() {
 				flusherInstance := NewFlusher(10, repoMock)
 
 				gomock.InOrder(
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[0:3])).Return(nil),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[0:3])).Return(nil),
 				)
 
 				Expect(flusherInstance.Flush(purchases) == nil).To(BeTrue())
@@ -75,8 +75,8 @@ var _ = Describe("Flusher", func() {
 				flusherInstance := NewFlusher(2, repoMock)
 
 				gomock.InOrder(
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[0:2])).Return(errors.New("Opps, error happens")),
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[2:3])).Return(errors.New("Opps, error happens")),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[0:2])).Return(errors.New("Opps, error happens")),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[2:3])).Return(errors.New("Opps, error happens")),
 				)
 
 				Expect(flusherInstance.Flush(purchases)).To(Equal(purchases))
@@ -88,8 +88,8 @@ var _ = Describe("Flusher", func() {
 				flusherInstance := NewFlusher(2, repoMock)
 
 				gomock.InOrder(
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[0:2])).Return(errors.New("Opps, error happens")),
-					repoMock.EXPECT().AddEntities(gomock.Eq(purchases[2:3])).Return(nil),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[0:2])).Return(errors.New("Opps, error happens")),
+					repoMock.EXPECT().AddPurchases(gomock.Eq(purchases[2:3])).Return(nil),
 				)
 
 				Expect(flusherInstance.Flush(purchases)).To(Equal(purchases[0:2]))
