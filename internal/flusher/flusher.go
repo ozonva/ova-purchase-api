@@ -7,10 +7,10 @@ import (
 )
 
 type Flusher interface {
-	Flush(entities []purchase.Purchase) []purchase.Purchase
+	Flush(purchases []purchase.Purchase) []purchase.Purchase
 }
 
-func NewFlusher(chunkSize uint, repository repo.Repo) *flusher {
+func NewFlusher(chunkSize uint, repository repo.Repo) Flusher {
 	return &flusher{
 		chunkSize: chunkSize,
 		repo:      repository,
@@ -22,14 +22,14 @@ type flusher struct {
 	repo      repo.Repo
 }
 
-func (s *flusher) Flush(entities []purchase.Purchase) []purchase.Purchase {
-	batch, err := utils.SplitToBulks(entities, s.chunkSize)
+func (s *flusher) Flush(purchases []purchase.Purchase) []purchase.Purchase {
+	batch, err := utils.SplitToBulks(purchases, s.chunkSize)
 	if err != nil {
-		return entities
+		return purchases
 	}
 	result := make([]purchase.Purchase, 0)
 	for _, items := range batch {
-		if err := s.repo.AddEntities(items); err != nil {
+		if err := s.repo.AddPurchases(items); err != nil {
 			result = append(result, items...)
 		}
 	}
