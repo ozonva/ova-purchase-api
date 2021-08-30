@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ozonva/ova-purchase-api/pkg/ova-purchase-api;ova_purchase_api";
+
+service PurchaseService {
+  rpc CreatePurchase(CreatePurchaseRequest) returns (CreatePurchaseResponse) {
+    option (google.api.http) = {
+      post: "/v1/purchases"
+    };
+  }
+  rpc DescribePurchase(DescribePurchaseRequest) returns (DescribePurchaseResponse) {
+    option (google.api.http) = {
+      get: "/v1/purchases/{id}"
+    };
+  }
+  rpc ListPurchases(ListPurchasesRequest) returns (ListPurchasesResponse) {
+    option (google.api.http) = {
+      get: "/v1/purchases"
+    };
+  }
+  rpc RemovePurchase(RemovePurchaseRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/purchases/{id}"
+    };
+  }
+}
+
+message Item {
+  int64 id = 1;
+  string name = 2;
+  uint32 price = 3;
+  uint32 quantity = 4;
+}
+
+message CreatePurchaseRequest {
+  repeated Item items = 1;
+}
+
+message CreatePurchaseResponse {
+  int64 id = 1;
+  repeated Item items = 2;
+  double total = 3;
+
+  google.protobuf.Timestamp createdAt = 4;
+  google.protobuf.Timestamp updatedAt = 5;
+  PurchaseStatus status= 6;
+}
+
+message DescribePurchaseRequest {
+  int64 id = 1;
+}
+
+message DescribePurchaseResponse {
+  int64 id = 1;
+  repeated Item items = 2;
+  double total = 3;
+
+  google.protobuf.Timestamp createdAt = 4;
+  google.protobuf.Timestamp updatedAt = 5;
+  PurchaseStatus status= 6;
+}
+
+message ListPurchasesRequest {
+  uint32 offset = 1;
+  uint32 limit = 2;
+}
+
+message Purchase {
+  int64 id = 1;
+  repeated Item items = 2;
+  double total = 3;
+
+  google.protobuf.Timestamp createdAt = 4;
+  google.protobuf.Timestamp updatedAt = 5;
+  PurchaseStatus status= 6;
+}
+
+message ListPurchasesResponse {
+  uint32 total = 1;
+  repeated Purchase purchases = 2;
+}
+
+message RemovePurchaseRequest {
+  int64 id = 1;
+}
+
+enum PurchaseStatus {
+    Created = 0;
+    Pending = 1;
+    Success = 2;
+    Failure = 3;
+}
