@@ -10,6 +10,7 @@ service PurchaseService {
   rpc CreatePurchase(CreatePurchaseRequest) returns (CreatePurchaseResponse) {
     option (google.api.http) = {
       post: "/v1/purchases"
+      body: "*"
     };
   }
   rpc DescribePurchase(DescribePurchaseRequest) returns (DescribePurchaseResponse) {
@@ -29,24 +30,32 @@ service PurchaseService {
   }
 }
 
-message Item {
-  int64 id = 1;
-  string name = 2;
-  uint32 price = 3;
-  uint32 quantity = 4;
-}
-
 message CreatePurchaseRequest {
+  message Item {
+    int64 id = 1;
+    string name = 2;
+    uint32 price = 3;
+    uint32 quantity = 4;
+  }
   repeated Item items = 1;
 }
 
 message CreatePurchaseResponse {
+
+  message Item {
+    int64 id = 1;
+    string name = 2;
+    uint32 price = 3;
+    uint32 quantity = 4;
+  }
+
   int64 id = 1;
   repeated Item items = 2;
   double total = 3;
 
-  google.protobuf.Timestamp createdAt = 4;
-  google.protobuf.Timestamp updatedAt = 5;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+
   PurchaseStatus status= 6;
 }
 
@@ -55,12 +64,20 @@ message DescribePurchaseRequest {
 }
 
 message DescribePurchaseResponse {
+
+  message Item {
+    int64 id = 1;
+    string name = 2;
+    uint32 price = 3;
+    uint32 quantity = 4;
+  }
+
   int64 id = 1;
   repeated Item items = 2;
   double total = 3;
 
-  google.protobuf.Timestamp createdAt = 4;
-  google.protobuf.Timestamp updatedAt = 5;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
   PurchaseStatus status= 6;
 }
 
@@ -70,12 +87,20 @@ message ListPurchasesRequest {
 }
 
 message Purchase {
+
+  message Item {
+    int64 id = 1;
+    string name = 2;
+    uint32 price = 3;
+    uint32 quantity = 4;
+  }
+
   int64 id = 1;
   repeated Item items = 2;
   double total = 3;
 
-  google.protobuf.Timestamp createdAt = 4;
-  google.protobuf.Timestamp updatedAt = 5;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
   PurchaseStatus status= 6;
 }
 
