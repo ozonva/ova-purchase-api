@@ -23,6 +23,19 @@ type server struct {
 	httpPort uint
 }
 
+func logUnaryInterceptor(log *zerolog.Logger) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		startTime := time.Now()
+		resp, err := handler(ctx, req)
+		if err != nil {
+			log.Error().Time("time", startTime).Msgf("Executing endpoint %s", info.FullMethod)
+		} else {
+			log.Info().Time("time", startTime).Msgf("Executing endpoint %s", info.FullMethod)
+		}
+		return resp, err
+	}
+}
+
 func (s *server) runHttp(wg *sync.WaitGroup) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -53,8 +66,9 @@ func (s *server) runGrpc(wg *sync.WaitGroup) {
 	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
 	log := zerolog.New(output).With().Timestamp().Logger()
 
-	server := grpc.NewServer()
-	api.RegisterPurchaseServiceServer(server, NewPurchaseServer(&log))
+	server := grpc.NewServer(grpc.ChainUnaryInterceptor(logUnaryInterceptor(&log)))
+
+	api.RegisterPurchaseServiceServer(server, NewPurchaseServer())
 
 	if err := server.Serve(listen); err != nil {
 		panic(err)
