@@ -1,0 +1,18 @@
+version: '3.1'
+services:
+  purchase-db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=purchases
+    ports:
+      - "5432:5432"
+
+#  purchase-app:
+#    build: .
+#    depends_on:
+#      - db
+#    links:
+#      - db
+#    ports:
+#      - "8080:8080"

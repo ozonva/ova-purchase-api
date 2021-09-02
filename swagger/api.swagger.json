@@ -102,7 +102,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "format": "int64"
+            "format": "uint64"
           }
         ],
         "tags": [
@@ -131,7 +131,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "format": "int64"
+            "format": "uint64"
           }
         ],
         "tags": [
@@ -155,16 +155,12 @@
     "CreatePurchaseRequestItem": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
         "name": {
           "type": "string"
         },
         "price": {
-          "type": "integer",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "quantity": {
           "type": "integer",
@@ -177,7 +173,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64"
+          "format": "uint64"
         },
         "items": {
           "type": "array",
@@ -207,14 +203,14 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64"
+          "format": "uint64"
         },
         "name": {
           "type": "string"
         },
         "price": {
-          "type": "integer",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "quantity": {
           "type": "integer",
@@ -227,7 +223,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64"
+          "format": "uint64"
         },
         "items": {
           "type": "array",
@@ -257,14 +253,14 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64"
+          "format": "uint64"
         },
         "name": {
           "type": "string"
         },
         "price": {
-          "type": "integer",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "quantity": {
           "type": "integer",
@@ -292,7 +288,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64"
+          "format": "uint64"
         },
         "items": {
           "type": "array",
@@ -322,14 +318,14 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64"
+          "format": "uint64"
         },
         "name": {
           "type": "string"
         },
         "price": {
-          "type": "integer",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "quantity": {
           "type": "integer",

@@ -1,6 +1,7 @@
 package flusher
 
 import (
+	"context"
 	"github.com/ozonva/ova-purchase-api/internal/purchase"
 	"github.com/ozonva/ova-purchase-api/internal/repo"
 	"github.com/ozonva/ova-purchase-api/internal/utils"
@@ -29,7 +30,7 @@ func (s *flusher) Flush(purchases []purchase.Purchase) []purchase.Purchase {
 	}
 	result := make([]purchase.Purchase, 0)
 	for _, items := range batch {
-		if err := s.repo.AddPurchases(items); err != nil {
+		if err := s.repo.AddPurchases(context.Background(), items); err != nil {
 			result = append(result, items...)
 		}
 	}

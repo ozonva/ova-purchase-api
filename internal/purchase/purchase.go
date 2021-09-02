@@ -25,13 +25,13 @@ type Item struct {
 
 type Purchase struct {
 	Id     uint64
-	UserID uint64
+	UserID uint64 `db:"user_id"`
 
 	Total decimal.Decimal
 	Items []Item
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 	Status    Status
 }
 

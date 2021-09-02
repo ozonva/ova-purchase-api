@@ -1,3 +1,8 @@
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
+
 default: build
 
 LOCAL_BIN:=$(CURDIR)/bin
@@ -33,8 +38,12 @@ install-go-deps: .install-go-deps
 	GOBIN=$(LOCAL_BIN) go get -u github.com/golang/protobuf/protoc-gen-go
 	GOBIN=$(LOCAL_BIN) go get -u google.golang.org/grpc
 	GOBIN=$(LOCAL_BIN) go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	GOBIN=$(LOCAL_BIN) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+	GOBIN=$(LOCAL_BIN) go get -u github.com/envoyproxy/protoc-gen-validate
+	GOBIN=$(LOCAL_BIN) go get -u github.com/joho/godotenv
+	GOBIN=$(LOCAL_BIN) go get -u github.com/pressly/goose/v3/cmd/goose
+	GOBIN=$(LOCAL_BIN) go install -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	GOBIN=$(LOCAL_BIN) go install -u github.com/envoyproxy/protoc-gen-validate
+	GOBIN=$(LOCAL_BIN) go install -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
 
 .PHONY: .generate
@@ -42,7 +51,7 @@ install-go-deps: .install-go-deps
 	mkdir -p swagger
 	mkdir -p pkg/ova-purchase-api
 	GOBIN=$(LOCAL_BIN) PATH=$(PATH):$(LOCAL_BIN) protoc -I vendor.protogen \
-		--go_out=pkg/ova-purchase-api --go_opt=paths=import \
+		--go_out=pkg/ova-purchase-api --go_opt=paths=import --validate_out=lang=go:pkg/ova-purchase-api \
 		--go-grpc_out=pkg/ova-purchase-api --go-grpc_opt=paths=import \
 		--grpc-gateway_out=pkg/ova-purchase-api \
 		--grpc-gateway_opt=logtostderr=true \
@@ -78,3 +87,7 @@ mocks:
 
 .PHONY: build
 build: vendor-proto .generate .build
+
+.PHONY: migrate
+migrate:
+	PATH=$(PATH):$(LOCAL_BIN) goose postgres "postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" up -dir db/migration
