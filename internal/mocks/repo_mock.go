@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -34,46 +35,75 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 	return m.recorder
 }
 
-// AddPurchases mocks base method.
-func (m *MockRepo) AddPurchases(purchases []purchase.Purchase) error {
+// AddPurchase mocks base method.
+func (m *MockRepo) AddPurchase(ctx context.Context, purchases purchase.Purchase) (uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddPurchases", purchases)
+	ret := m.ctrl.Call(m, "AddPurchase", ctx, purchases)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddPurchase indicates an expected call of AddPurchase.
+func (mr *MockRepoMockRecorder) AddPurchase(ctx, purchases interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPurchase", reflect.TypeOf((*MockRepo)(nil).AddPurchase), ctx, purchases)
+}
+
+// AddPurchases mocks base method.
+func (m *MockRepo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddPurchases", ctx, purchases)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddPurchases indicates an expected call of AddPurchases.
-func (mr *MockRepoMockRecorder) AddPurchases(purchases interface{}) *gomock.Call {
+func (mr *MockRepoMockRecorder) AddPurchases(ctx, purchases interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPurchases", reflect.TypeOf((*MockRepo)(nil).AddPurchases), purchases)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddPurchases", reflect.TypeOf((*MockRepo)(nil).AddPurchases), ctx, purchases)
 }
 
 // DescribePurchase mocks base method.
-func (m *MockRepo) DescribePurchase(purchaseId uint64) (*purchase.Purchase, error) {
+func (m *MockRepo) DescribePurchase(ctx context.Context, purchaseId uint64) (*purchase.Purchase, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DescribePurchase", purchaseId)
+	ret := m.ctrl.Call(m, "DescribePurchase", ctx, purchaseId)
 	ret0, _ := ret[0].(*purchase.Purchase)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // DescribePurchase indicates an expected call of DescribePurchase.
-func (mr *MockRepoMockRecorder) DescribePurchase(purchaseId interface{}) *gomock.Call {
+func (mr *MockRepoMockRecorder) DescribePurchase(ctx, purchaseId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribePurchase", reflect.TypeOf((*MockRepo)(nil).DescribePurchase), purchaseId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribePurchase", reflect.TypeOf((*MockRepo)(nil).DescribePurchase), ctx, purchaseId)
 }
 
 // ListPurchases mocks base method.
-func (m *MockRepo) ListPurchases(limit, offset uint64) ([]purchase.Purchase, error) {
+func (m *MockRepo) ListPurchases(ctx context.Context, limit, offset uint) ([]purchase.Purchase, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListPurchases", limit, offset)
+	ret := m.ctrl.Call(m, "ListPurchases", ctx, limit, offset)
 	ret0, _ := ret[0].([]purchase.Purchase)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListPurchases indicates an expected call of ListPurchases.
-func (mr *MockRepoMockRecorder) ListPurchases(limit, offset interface{}) *gomock.Call {
+func (mr *MockRepoMockRecorder) ListPurchases(ctx, limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPurchases", reflect.TypeOf((*MockRepo)(nil).ListPurchases), limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPurchases", reflect.TypeOf((*MockRepo)(nil).ListPurchases), ctx, limit, offset)
+}
+
+// RemovePurchase mocks base method.
+func (m *MockRepo) RemovePurchase(ctx context.Context, purchaseId uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemovePurchase", ctx, purchaseId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemovePurchase indicates an expected call of RemovePurchase.
+func (mr *MockRepoMockRecorder) RemovePurchase(ctx, purchaseId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePurchase", reflect.TypeOf((*MockRepo)(nil).RemovePurchase), ctx, purchaseId)
 }

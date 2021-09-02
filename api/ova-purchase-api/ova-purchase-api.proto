@@ -3,6 +3,7 @@ syntax = "proto3";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "envoyproxy/validate/validate.proto";
 
 option go_package = "github.com/ozonva/ova-purchase-api/pkg/ova-purchase-api;ova_purchase_api";
 
@@ -32,53 +33,52 @@ service PurchaseService {
 
 message CreatePurchaseRequest {
   message Item {
-    int64 id = 1;
-    string name = 2;
-    uint32 price = 3;
-    uint32 quantity = 4;
+    string name = 1 [(validate.rules).string.min_len = 1];
+    double price = 2 [(validate.rules).double.gt = 0];
+    uint32 quantity = 3 [(validate.rules).uint32.gt = 0];
   }
-  repeated Item items = 1;
+  repeated Item items = 1 [(validate.rules).repeated.min_items = 1];
 }
 
 message CreatePurchaseResponse {
 
   message Item {
-    int64 id = 1;
+    uint64 id = 1;
     string name = 2;
-    uint32 price = 3;
+    double price = 3;
     uint32 quantity = 4;
   }
 
-  int64 id = 1;
+  uint64 id = 1;
   repeated Item items = 2;
   double total = 3;
 
   google.protobuf.Timestamp created_at = 4;
   google.protobuf.Timestamp updated_at = 5;
 
-  PurchaseStatus status= 6;
+  PurchaseStatus status = 6;
 }
 
 message DescribePurchaseRequest {
-  int64 id = 1;
+  uint64 id = 1;
 }
 
 message DescribePurchaseResponse {
 
   message Item {
-    int64 id = 1;
+    uint64 id = 1;
     string name = 2;
-    uint32 price = 3;
+    double price = 3;
     uint32 quantity = 4;
   }
 
-  int64 id = 1;
+  uint64 id = 1;
   repeated Item items = 2;
   double total = 3;
 
   google.protobuf.Timestamp created_at = 4;
   google.protobuf.Timestamp updated_at = 5;
-  PurchaseStatus status= 6;
+  PurchaseStatus status = 6;
 }
 
 message ListPurchasesRequest {
@@ -89,19 +89,19 @@ message ListPurchasesRequest {
 message Purchase {
 
   message Item {
-    int64 id = 1;
+    uint64 id = 1;
     string name = 2;
-    uint32 price = 3;
+    double price = 3;
     uint32 quantity = 4;
   }
 
-  int64 id = 1;
+  uint64 id = 1;
   repeated Item items = 2;
   double total = 3;
 
   google.protobuf.Timestamp created_at = 4;
   google.protobuf.Timestamp updated_at = 5;
-  PurchaseStatus status= 6;
+  PurchaseStatus status = 6;
 }
 
 message ListPurchasesResponse {
@@ -110,12 +110,12 @@ message ListPurchasesResponse {
 }
 
 message RemovePurchaseRequest {
-  int64 id = 1;
+  uint64 id = 1;
 }
 
 enum PurchaseStatus {
-    Created = 0;
-    Pending = 1;
-    Success = 2;
-    Failure = 3;
+  Created = 0;
+  Pending = 1;
+  Success = 2;
+  Failure = 3;
 }

@@ -1,10 +1,188 @@
 package repo
 
-import "github.com/ozonva/ova-purchase-api/internal/purchase"
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"github.com/jmoiron/sqlx"
+	"github.com/ozonva/ova-purchase-api/internal/purchase"
+	"github.com/rs/zerolog/log"
+	"github.com/shopspring/decimal"
+	"time"
+)
 
 // Repo - интерфейс хранилища для сущности
 type Repo interface {
-	AddPurchases(purchases []purchase.Purchase) error
-	ListPurchases(limit, offset uint64) ([]purchase.Purchase, error)
-	DescribePurchase(purchaseId uint64) (*purchase.Purchase, error)
+	AddPurchase(ctx context.Context, purchases purchase.Purchase) (uint64, error)
+	AddPurchases(ctx context.Context, purchases []purchase.Purchase) error
+	ListPurchases(ctx context.Context, limit, offset uint) ([]purchase.Purchase, error)
+	DescribePurchase(ctx context.Context, purchaseId uint64) (*purchase.Purchase, error)
+	RemovePurchase(ctx context.Context, purchaseId uint64) error
+}
+
+type PurchaseRow struct {
+	Id        uint64
+	ItemId    sql.NullInt64 `db:"item_id"`
+	UserId    uint64        `db:"user_id"`
+	Total     decimal.Decimal
+	Name      sql.NullString
+	Price     sql.NullFloat64
+	Quantity  sql.NullInt32
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	Status    purchase.Status
+}
+
+type repo struct {
+	db *sqlx.DB
+}
+
+func NewRepo(db *sqlx.DB) Repo {
+	return &repo{
+		db: db,
+	}
+}
+
+func (s *repo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) error {
+
+	return nil
+}
+
+func (s *repo) AddPurchase(ctx context.Context, purchase purchase.Purchase) (uint64, error) {
+	tx, err := s.db.BeginTxx(ctx, nil)
+
+	if err != nil {
+		return 0, err
+	}
+	row := tx.QueryRowContext(ctx, `insert into purchases (user_id, total, updated_at, status) values ($1, $2, $3, $4) RETURNING id`, purchase.UserID, purchase.Total, purchase.UpdatedAt, purchase.Status)
+	purchaseId := 0
+	err = row.Scan(&purchaseId)
+	if err != nil {
+		return 0, err
+	}
+	statement, err := tx.Prepare("insert into purchase_items (purchase_id, name, price, quantity) values ($1, $2, $3, $4)")
+	if err != nil {
+		return 0, err
+	}
+	for _, item := range purchase.Items {
+		_, err = statement.ExecContext(ctx, purchaseId, item.Name, item.Price, item.Quantity)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return uint64(purchaseId), tx.Commit()
+}
+
+func (s *repo) ListPurchases(ctx context.Context, limit, offset uint) ([]purchase.Purchase, error) {
+	rows, err := s.db.QueryxContext(ctx, `
+			with ps as (select * from purchases offset $1 limit $2)
+			select ps.*, i.id as item_id, i.name, i.price, i.quantity from ps left join purchase_items i on i.purchase_id = ps.id
+		`, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	selected := make([]PurchaseRow, 0)
+	for rows.Next() {
+		entity := PurchaseRow{}
+		err = rows.StructScan(&entity)
+		if err != nil {
+			return nil, err
+		}
+		selected = append(selected, entity)
+	}
+	purchases := make([]purchase.Purchase, 0)
+	exist := make(map[uint64]purchase.Purchase)
+	for _, item := range selected {
+		if p, ok := exist[item.Id]; !ok {
+			added := purchase.Purchase{
+				Id:        item.Id,
+				UserID:    item.UserId,
+				Total:     item.Total,
+				CreatedAt: item.CreatedAt,
+				UpdatedAt: item.UpdatedAt,
+				Items:     make([]purchase.Item, 0),
+				Status:    item.Status,
+			}
+			exist[item.Id] = added
+			if item.ItemId.Valid {
+				added.Items = append(added.Items, purchase.Item{
+					Id:       uint64(item.ItemId.Int64),
+					Name:     item.Name.String,
+					Price:    decimal.NewFromFloat(item.Price.Float64),
+					Quantity: uint(item.Quantity.Int32),
+				})
+			}
+			purchases = append(purchases, added)
+		} else {
+			p.Items = append(p.Items, purchase.Item{
+				Id:       uint64(item.ItemId.Int64),
+				Name:     item.Name.String,
+				Price:    decimal.NewFromFloat(item.Price.Float64),
+				Quantity: uint(item.Quantity.Int32),
+			})
+		}
+	}
+	return purchases, nil
+}
+
+func (s *repo) DescribePurchase(ctx context.Context, purchaseId uint64) (*purchase.Purchase, error) {
+	rows, err := s.db.QueryxContext(ctx, `
+			select p.*, i.id as item_id, i.name, i.price, i.quantity 
+					from purchases p 
+					    	left join purchase_items i on i.purchase_id = p.id
+						where p.id = $1
+	`, purchaseId)
+	defer rows.Close()
+
+	if err != nil {
+		log.Error().Msgf("WHAT?")
+		return nil, err
+	}
+	var p *purchase.Purchase
+	for rows.Next() {
+		row := PurchaseRow{}
+		if err = rows.StructScan(&row); err != nil {
+			return nil, err
+		}
+		if p == nil {
+			p = &purchase.Purchase{
+				Id:        row.Id,
+				Total:     row.Total,
+				CreatedAt: row.CreatedAt,
+				UpdatedAt: row.UpdatedAt,
+				Status:    row.Status,
+				Items:     make([]purchase.Item, 0),
+			}
+		}
+		if row.ItemId.Valid {
+			p.Items = append(p.Items, purchase.Item{
+				Id:       uint64(row.ItemId.Int64),
+				Name:     row.Name.String,
+				Price:    decimal.NewFromFloat(row.Price.Float64),
+				Quantity: uint(row.Quantity.Int32),
+			})
+		}
+	}
+	return p, nil
+}
+
+func (s *repo) RemovePurchase(ctx context.Context, purchaseId uint64) error {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, `delete from purchase_items where purchase_id = $1`, purchaseId)
+	if err != nil {
+		return err
+	}
+	result, err := tx.ExecContext(ctx, `delete from purchases where id = $1`, purchaseId)
+	if err != nil {
+		return err
+	}
+	if count, _ := result.RowsAffected(); count == 0 {
+		return errors.New("Purchase not found")
+	}
+	return tx.Commit()
 }
