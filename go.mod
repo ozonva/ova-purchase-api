@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/ClickHouse/clickhouse-go v1.4.7 // indirect
+	github.com/alvaroloes/enumer v1.1.2 // indirect
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect

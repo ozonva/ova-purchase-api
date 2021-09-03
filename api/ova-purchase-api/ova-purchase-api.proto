@@ -33,7 +33,7 @@ service PurchaseService {
 
 message CreatePurchaseRequest {
   message Item {
-    string name = 1 [(validate.rules).string.min_len = 1];
+    string name = 1 [(validate.rules).string = {min_len : 1, max_len : 255}];
     double price = 2 [(validate.rules).double.gt = 0];
     uint32 quantity = 3 [(validate.rules).uint32.gt = 0];
   }

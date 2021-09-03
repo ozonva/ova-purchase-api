@@ -5,8 +5,6 @@ import (
 	"fmt"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/jmoiron/sqlx"
-	"github.com/ozonva/ova-purchase-api/internal/repo"
 	api "github.com/ozonva/ova-purchase-api/pkg/ova-purchase-api"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
@@ -22,9 +20,9 @@ type Server interface {
 }
 
 type server struct {
-	db       *sqlx.DB
-	grpcPort uint
-	httpPort uint
+	purchaseServer *PurchaseServer
+	grpcPort       uint
+	httpPort       uint
 }
 
 func logUnaryInterceptor(log *zerolog.Logger) grpc.UnaryServerInterceptor {
@@ -75,7 +73,7 @@ func (s *server) runGrpc(wg *sync.WaitGroup) {
 		grpc_recovery.UnaryServerInterceptor(),
 	))
 
-	api.RegisterPurchaseServiceServer(server, NewPurchaseServer(repo.NewRepo(s.db)))
+	api.RegisterPurchaseServiceServer(server, s.purchaseServer)
 
 	if err := server.Serve(listen); err != nil {
 		panic(err)
@@ -91,10 +89,10 @@ func (s *server) Run() {
 	wg.Wait()
 }
 
-func NewServer(db *sqlx.DB, grpcPort uint, httpPort uint) Server {
+func NewServer(purchaseServer *PurchaseServer, grpcPort uint, httpPort uint) Server {
 	return &server{
-		db:       db,
-		grpcPort: grpcPort,
-		httpPort: httpPort,
+		purchaseServer: purchaseServer,
+		grpcPort:       grpcPort,
+		httpPort:       httpPort,
 	}
 }

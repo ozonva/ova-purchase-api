@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"github.com/ozonva/ova-purchase-api/internal/purchase"
 	"github.com/ozonva/ova-purchase-api/internal/repo"
 	api "github.com/ozonva/ova-purchase-api/pkg/ova-purchase-api"
@@ -31,11 +32,14 @@ func (s *PurchaseServer) CreatePurchase(context context.Context, request *api.Cr
 	}
 	p := purchase.New()
 	for _, item := range request.Items {
-		p.Add(purchase.Item{
+		_, err := p.Add(purchase.Item{
 			Price:    decimal.NewFromFloat(item.Price),
 			Name:     item.Name,
 			Quantity: uint(item.Quantity),
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	id, err := s.repo.AddPurchase(context, p)
 	if err != nil {
@@ -76,7 +80,7 @@ func (s *PurchaseServer) ListPurchases(context context.Context, request *api.Lis
 	if err != nil {
 		return nil, err
 	}
-	purchases := make([]*api.Purchase, 0)
+	purchases := make([]*api.Purchase, 0, len(list))
 	for _, p := range list {
 		total, _ := p.Total.Float64()
 		purchaseItems := make([]*api.Purchase_Item, 0)
@@ -106,10 +110,10 @@ func (s *PurchaseServer) ListPurchases(context context.Context, request *api.Lis
 func (s *PurchaseServer) DescribePurchase(context context.Context, request *api.DescribePurchaseRequest) (*api.DescribePurchaseResponse, error) {
 	p, err := s.repo.DescribePurchase(context, request.Id)
 	if err != nil {
+		if errors.Is(err, repo.PurchaseNotFoundError) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
 		return nil, err
-	}
-	if p == nil {
-		return nil, status.Error(codes.NotFound, "Purchase not found")
 	}
 	total, _ := p.Total.Float64()
 	items := make([]*api.DescribePurchaseResponse_Item, 0, len(p.Items))
@@ -135,7 +139,10 @@ func (s *PurchaseServer) DescribePurchase(context context.Context, request *api.
 func (s *PurchaseServer) RemovePurchase(context context.Context, request *api.RemovePurchaseRequest) (*emptypb.Empty, error) {
 	err := s.repo.RemovePurchase(context, request.Id)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		if errors.Is(err, repo.PurchaseNotFoundError) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, err
 	}
 	return &emptypb.Empty{}, nil
 }
