@@ -7,7 +7,7 @@ create table purchases
     total      float8,
     created_at timestamp default now() not null,
     updated_at timestamp               not null,
-    status     integer                 not null
+    status     varchar(255)            not null
 );
 -- +goose StatementEnd
 -- +goose StatementBegin
@@ -23,4 +23,10 @@ create table purchase_items
 -- +goose StatementBegin
 ALTER TABLE purchase_items
     ADD CONSTRAINT fk_purchase_items_purchase_id FOREIGN KEY (purchase_id) REFERENCES purchases (id);
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+drop table purchase_items;
+drop table purchases;
 -- +goose StatementEnd

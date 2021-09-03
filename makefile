@@ -41,6 +41,7 @@ install-go-deps: .install-go-deps
 	GOBIN=$(LOCAL_BIN) go get -u github.com/envoyproxy/protoc-gen-validate
 	GOBIN=$(LOCAL_BIN) go get -u github.com/joho/godotenv
 	GOBIN=$(LOCAL_BIN) go get -u github.com/pressly/goose/v3/cmd/goose
+	GOBIN=$(LOCAL_BIN) go install -u github.com/alvaroloes/enumer
 	GOBIN=$(LOCAL_BIN) go install -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	GOBIN=$(LOCAL_BIN) go install -u github.com/envoyproxy/protoc-gen-validate
 	GOBIN=$(LOCAL_BIN) go install -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
@@ -61,6 +62,7 @@ install-go-deps: .install-go-deps
 	mv pkg/ova-purchase-api/github.com/ozonva/ova-purchase-api/pkg/ova-purchase-api/* pkg/ova-purchase-api/
 	rm -rf pkg/ova-purchase-api/github.com
 	mkdir -p cmd/ova-purchase-api
+	GOBIN=$(LOCAL_BIN) PATH=$(PATH):$(LOCAL_BIN) enumer -type=Status -json -sql internal/purchase/purchase.go
 	#cd pkg/ova-purchase-api && ls go.mod || go mod init github.com/ozonva/ova-purchase-api/pkg/ova-purchase-api && go mod tidy
 
 .PHONY: generate

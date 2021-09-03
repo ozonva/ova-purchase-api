@@ -2,14 +2,13 @@ package repo
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/ozonva/ova-purchase-api/internal/purchase"
-	"github.com/rs/zerolog/log"
 	"github.com/shopspring/decimal"
-	"time"
 )
+
+var PurchaseNotFoundError = errors.New("Purchase not found")
 
 // Repo - интерфейс хранилища для сущности
 type Repo interface {
@@ -18,19 +17,6 @@ type Repo interface {
 	ListPurchases(ctx context.Context, limit, offset uint) ([]purchase.Purchase, error)
 	DescribePurchase(ctx context.Context, purchaseId uint64) (*purchase.Purchase, error)
 	RemovePurchase(ctx context.Context, purchaseId uint64) error
-}
-
-type PurchaseRow struct {
-	Id        uint64
-	ItemId    sql.NullInt64 `db:"item_id"`
-	UserId    uint64        `db:"user_id"`
-	Total     decimal.Decimal
-	Name      sql.NullString
-	Price     sql.NullFloat64
-	Quantity  sql.NullInt32
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	Status    purchase.Status
 }
 
 type repo struct {
@@ -54,7 +40,7 @@ func (s *repo) AddPurchase(ctx context.Context, purchase purchase.Purchase) (uin
 	if err != nil {
 		return 0, err
 	}
-	row := tx.QueryRowContext(ctx, `insert into purchases (user_id, total, updated_at, status) values ($1, $2, $3, $4) RETURNING id`, purchase.UserID, purchase.Total, purchase.UpdatedAt, purchase.Status)
+	row := tx.QueryRowContext(ctx, `insert into purchases (user_id, total, updated_at, status) values ($1, $2, $3, $4) RETURNING id`, purchase.UserID, purchase.Total, purchase.UpdatedAt, purchase.Status.String())
 	purchaseId := 0
 	err = row.Scan(&purchaseId)
 	if err != nil {
@@ -134,12 +120,11 @@ func (s *repo) DescribePurchase(ctx context.Context, purchaseId uint64) (*purcha
 					    	left join purchase_items i on i.purchase_id = p.id
 						where p.id = $1
 	`, purchaseId)
-	defer rows.Close()
-
 	if err != nil {
-		log.Error().Msgf("WHAT?")
 		return nil, err
 	}
+	defer rows.Close()
+
 	var p *purchase.Purchase
 	for rows.Next() {
 		row := PurchaseRow{}
@@ -165,6 +150,9 @@ func (s *repo) DescribePurchase(ctx context.Context, purchaseId uint64) (*purcha
 			})
 		}
 	}
+	if p == nil {
+		return nil, PurchaseNotFoundError
+	}
 	return p, nil
 }
 
@@ -182,7 +170,7 @@ func (s *repo) RemovePurchase(ctx context.Context, purchaseId uint64) error {
 		return err
 	}
 	if count, _ := result.RowsAffected(); count == 0 {
-		return errors.New("Purchase not found")
+		return PurchaseNotFoundError
 	}
 	return tx.Commit()
 }
