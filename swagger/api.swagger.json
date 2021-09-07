@@ -54,7 +54,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/CreatePurchaseResponse"
+              "$ref": "#/definitions/DescribePurchaseResponse"
             }
           },
           "default": {
@@ -71,6 +71,38 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/CreatePurchaseRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PurchaseService"
+        ]
+      }
+    },
+    "/v1/purchases/multi": {
+      "post": {
+        "operationId": "PurchaseService_MultiCreatePurchases",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/MultiCreatePurchaseResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MultiCreatePurchaseRequest"
             }
           }
         ],
@@ -137,6 +169,43 @@
         "tags": [
           "PurchaseService"
         ]
+      },
+      "post": {
+        "operationId": "PurchaseService_UpdatePurchase",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DescribePurchaseResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePurchaseRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PurchaseService"
+        ]
       }
     }
   },
@@ -155,56 +224,6 @@
     "CreatePurchaseRequestItem": {
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string"
-        },
-        "price": {
-          "type": "number",
-          "format": "double"
-        },
-        "quantity": {
-          "type": "integer",
-          "format": "int64"
-        }
-      }
-    },
-    "CreatePurchaseResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CreatePurchaseResponseItem"
-          }
-        },
-        "total": {
-          "type": "number",
-          "format": "double"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "status": {
-          "$ref": "#/definitions/PurchaseStatus"
-        }
-      }
-    },
-    "CreatePurchaseResponseItem": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        },
         "name": {
           "type": "string"
         },
@@ -283,6 +302,29 @@
         }
       }
     },
+    "MultiCreatePurchaseRequest": {
+      "type": "object",
+      "properties": {
+        "purchases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CreatePurchaseRequest"
+          }
+        }
+      }
+    },
+    "MultiCreatePurchaseResponse": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uint64"
+          }
+        }
+      }
+    },
     "Purchase": {
       "type": "object",
       "properties": {
@@ -342,6 +384,41 @@
         "Failure"
       ],
       "default": "Created"
+    },
+    "UpdatePurchaseRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UpdatePurchaseRequestItem"
+          }
+        }
+      }
+    },
+    "UpdatePurchaseRequestItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
     },
     "protobufAny": {
       "type": "object",

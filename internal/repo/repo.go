@@ -13,7 +13,8 @@ var PurchaseNotFoundError = errors.New("Purchase not found")
 // Repo - интерфейс хранилища для сущности
 type Repo interface {
 	AddPurchase(ctx context.Context, purchases purchase.Purchase) (uint64, error)
-	AddPurchases(ctx context.Context, purchases []purchase.Purchase) error
+	UpdatePurchase(ctx context.Context, purchases purchase.Purchase) error
+	AddPurchases(ctx context.Context, purchases []purchase.Purchase) ([]uint64, error)
 	ListPurchases(ctx context.Context, limit, offset uint) ([]purchase.Purchase, error)
 	DescribePurchase(ctx context.Context, purchaseId uint64) (*purchase.Purchase, error)
 	RemovePurchase(ctx context.Context, purchaseId uint64) error
@@ -29,20 +30,10 @@ func NewRepo(db *sqlx.DB) Repo {
 	}
 }
 
-func (s *repo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) error {
-
-	return nil
-}
-
-func (s *repo) AddPurchase(ctx context.Context, purchase purchase.Purchase) (uint64, error) {
-	tx, err := s.db.BeginTxx(ctx, nil)
-
-	if err != nil {
-		return 0, err
-	}
+func insertPurchase(ctx context.Context, tx *sqlx.Tx, purchase purchase.Purchase) (uint64, error) {
 	row := tx.QueryRowContext(ctx, `insert into purchases (user_id, total, updated_at, status) values ($1, $2, $3, $4) RETURNING id`, purchase.UserID, purchase.Total, purchase.UpdatedAt, purchase.Status.String())
 	purchaseId := 0
-	err = row.Scan(&purchaseId)
+	err := row.Scan(&purchaseId)
 	if err != nil {
 		return 0, err
 	}
@@ -56,7 +47,35 @@ func (s *repo) AddPurchase(ctx context.Context, purchase purchase.Purchase) (uin
 			return 0, err
 		}
 	}
-	return uint64(purchaseId), tx.Commit()
+	return uint64(purchaseId), nil
+}
+
+func (s *repo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) ([]uint64, error) {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	ids := make([]uint64, 0, len(purchases))
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range purchases {
+		id, err := insertPurchase(ctx, tx, p)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, tx.Commit()
+}
+
+func (s *repo) AddPurchase(ctx context.Context, purchase purchase.Purchase) (uint64, error) {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	id, err := insertPurchase(ctx, tx, purchase)
+	if err != nil {
+		return 0, err
+	}
+	return id, tx.Commit()
 }
 
 func (s *repo) ListPurchases(ctx context.Context, limit, offset uint) ([]purchase.Purchase, error) {
@@ -171,6 +190,32 @@ func (s *repo) RemovePurchase(ctx context.Context, purchaseId uint64) error {
 	}
 	if count, _ := result.RowsAffected(); count == 0 {
 		return PurchaseNotFoundError
+	}
+	return tx.Commit()
+}
+
+func (s *repo) UpdatePurchase(ctx context.Context, purchase purchase.Purchase) error {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, `delete from purchase_items where purchase_id = $1`, purchase.Id)
+	if err != nil {
+		return err
+	}
+	statement, err := tx.Prepare("insert into purchase_items (purchase_id, name, price, quantity) values ($1, $2, $3, $4)")
+	if err != nil {
+		return err
+	}
+	for _, item := range purchase.Items {
+		_, err = statement.ExecContext(ctx, purchase.Id, item.Name, item.Price, item.Quantity)
+		if err != nil {
+			return err
+		}
+	}
+	_, err = tx.ExecContext(ctx, `update purchases set total=$2, updated_at=now() where purchase_id = $1`, purchase.Id, purchase.Total)
+	if err != nil {
+		return err
 	}
 	return tx.Commit()
 }

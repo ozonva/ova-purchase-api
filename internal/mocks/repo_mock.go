@@ -51,11 +51,12 @@ func (mr *MockRepoMockRecorder) AddPurchase(ctx, purchases interface{}) *gomock.
 }
 
 // AddPurchases mocks base method.
-func (m *MockRepo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) error {
+func (m *MockRepo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) ([]uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddPurchases", ctx, purchases)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // AddPurchases indicates an expected call of AddPurchases.
@@ -106,4 +107,18 @@ func (m *MockRepo) RemovePurchase(ctx context.Context, purchaseId uint64) error 
 func (mr *MockRepoMockRecorder) RemovePurchase(ctx, purchaseId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePurchase", reflect.TypeOf((*MockRepo)(nil).RemovePurchase), ctx, purchaseId)
+}
+
+// UpdatePurchase mocks base method.
+func (m *MockRepo) UpdatePurchase(ctx context.Context, purchases purchase.Purchase) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePurchase", ctx, purchases)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePurchase indicates an expected call of UpdatePurchase.
+func (mr *MockRepoMockRecorder) UpdatePurchase(ctx, purchases interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePurchase", reflect.TypeOf((*MockRepo)(nil).UpdatePurchase), ctx, purchases)
 }

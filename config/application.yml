@@ -1,0 +1,31 @@
+application:
+  name: Purchase API
+
+
+grpc:
+  host:
+  port: 81
+
+gateway:
+  host:
+  port: 8181
+
+db:
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+  name: ${DB_NAME}
+  password: ${DB_PASSWORD}
+  username: ${DB_USERNAME}
+
+kafka:
+  topic: purchase-events
+  brokers:
+    - localhost:9092
+
+prometheus:
+  host:
+  port: 9001
+  path: /prometheus
+
+batch:
+  size: 1024
