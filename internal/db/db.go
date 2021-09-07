@@ -5,9 +5,14 @@ import (
 	"database/sql"
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
 )
 
-func NewDB(url string) (*sqlx.DB, error) {
+type DB struct {
+	Db *sqlx.DB
+}
+
+func NewDB(url string) (*DB, error) {
 	db, err := sql.Open("pgx", url)
 	if err != nil {
 		return nil, err
@@ -17,5 +22,14 @@ func NewDB(url string) (*sqlx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newDb, nil
+	return &DB{
+		Db: newDb,
+	}, nil
+}
+
+func (s *DB) Disposal() {
+	log.Debug().Msg("Closing db...")
+	if err := s.Db.Close(); err != nil {
+		log.Error().Err(err).Msg("Failed to close db")
+	}
 }

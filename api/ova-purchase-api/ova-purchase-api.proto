@@ -8,9 +8,15 @@ import "envoyproxy/validate/validate.proto";
 option go_package = "github.com/ozonva/ova-purchase-api/pkg/ova-purchase-api;ova_purchase_api";
 
 service PurchaseService {
-  rpc CreatePurchase(CreatePurchaseRequest) returns (CreatePurchaseResponse) {
+  rpc CreatePurchase(CreatePurchaseRequest) returns (DescribePurchaseResponse) {
     option (google.api.http) = {
       post: "/v1/purchases"
+      body: "*"
+    };
+  }
+  rpc UpdatePurchase(UpdatePurchaseRequest) returns (DescribePurchaseResponse) {
+    option (google.api.http) = {
+      post: "/v1/purchases/{id}"
       body: "*"
     };
   }
@@ -29,6 +35,12 @@ service PurchaseService {
       delete: "/v1/purchases/{id}"
     };
   }
+  rpc MultiCreatePurchases(MultiCreatePurchaseRequest) returns(MultiCreatePurchaseResponse) {
+    option (google.api.http) = {
+      post: "/v1/purchases/multi"
+      body: "*"
+    };
+  }
 }
 
 message CreatePurchaseRequest {
@@ -38,25 +50,6 @@ message CreatePurchaseRequest {
     uint32 quantity = 3 [(validate.rules).uint32.gt = 0];
   }
   repeated Item items = 1 [(validate.rules).repeated.min_items = 1];
-}
-
-message CreatePurchaseResponse {
-
-  message Item {
-    uint64 id = 1;
-    string name = 2;
-    double price = 3;
-    uint32 quantity = 4;
-  }
-
-  uint64 id = 1;
-  repeated Item items = 2;
-  double total = 3;
-
-  google.protobuf.Timestamp created_at = 4;
-  google.protobuf.Timestamp updated_at = 5;
-
-  PurchaseStatus status = 6;
 }
 
 message DescribePurchaseRequest {
@@ -111,6 +104,25 @@ message ListPurchasesResponse {
 
 message RemovePurchaseRequest {
   uint64 id = 1;
+}
+
+message MultiCreatePurchaseRequest {
+  repeated CreatePurchaseRequest purchases = 1 [(validate.rules).repeated.min_items = 1];
+}
+
+message MultiCreatePurchaseResponse {
+  repeated uint64 ids = 1;
+}
+
+message UpdatePurchaseRequest {
+  uint64 id = 1;
+  message Item {
+    uint64 id = 1 [(validate.rules).uint64.gt = 0];
+    string name = 2 [(validate.rules).string = {min_len : 1, max_len : 255}];
+    double price = 3 [(validate.rules).double.gt = 0];
+    uint32 quantity = 4 [(validate.rules).uint32.gt = 0];
+  }
+  repeated Item items = 2 [(validate.rules).repeated.min_items = 1];
 }
 
 enum PurchaseStatus {

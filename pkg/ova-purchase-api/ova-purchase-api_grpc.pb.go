@@ -19,10 +19,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PurchaseServiceClient interface {
-	CreatePurchase(ctx context.Context, in *CreatePurchaseRequest, opts ...grpc.CallOption) (*CreatePurchaseResponse, error)
+	CreatePurchase(ctx context.Context, in *CreatePurchaseRequest, opts ...grpc.CallOption) (*DescribePurchaseResponse, error)
+	UpdatePurchase(ctx context.Context, in *UpdatePurchaseRequest, opts ...grpc.CallOption) (*DescribePurchaseResponse, error)
 	DescribePurchase(ctx context.Context, in *DescribePurchaseRequest, opts ...grpc.CallOption) (*DescribePurchaseResponse, error)
 	ListPurchases(ctx context.Context, in *ListPurchasesRequest, opts ...grpc.CallOption) (*ListPurchasesResponse, error)
 	RemovePurchase(ctx context.Context, in *RemovePurchaseRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	MultiCreatePurchases(ctx context.Context, in *MultiCreatePurchaseRequest, opts ...grpc.CallOption) (*MultiCreatePurchaseResponse, error)
 }
 
 type purchaseServiceClient struct {
@@ -33,9 +35,18 @@ func NewPurchaseServiceClient(cc grpc.ClientConnInterface) PurchaseServiceClient
 	return &purchaseServiceClient{cc}
 }
 
-func (c *purchaseServiceClient) CreatePurchase(ctx context.Context, in *CreatePurchaseRequest, opts ...grpc.CallOption) (*CreatePurchaseResponse, error) {
-	out := new(CreatePurchaseResponse)
+func (c *purchaseServiceClient) CreatePurchase(ctx context.Context, in *CreatePurchaseRequest, opts ...grpc.CallOption) (*DescribePurchaseResponse, error) {
+	out := new(DescribePurchaseResponse)
 	err := c.cc.Invoke(ctx, "/PurchaseService/CreatePurchase", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *purchaseServiceClient) UpdatePurchase(ctx context.Context, in *UpdatePurchaseRequest, opts ...grpc.CallOption) (*DescribePurchaseResponse, error) {
+	out := new(DescribePurchaseResponse)
+	err := c.cc.Invoke(ctx, "/PurchaseService/UpdatePurchase", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,14 +80,25 @@ func (c *purchaseServiceClient) RemovePurchase(ctx context.Context, in *RemovePu
 	return out, nil
 }
 
+func (c *purchaseServiceClient) MultiCreatePurchases(ctx context.Context, in *MultiCreatePurchaseRequest, opts ...grpc.CallOption) (*MultiCreatePurchaseResponse, error) {
+	out := new(MultiCreatePurchaseResponse)
+	err := c.cc.Invoke(ctx, "/PurchaseService/MultiCreatePurchases", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PurchaseServiceServer is the server API for PurchaseService service.
 // All implementations must embed UnimplementedPurchaseServiceServer
 // for forward compatibility
 type PurchaseServiceServer interface {
-	CreatePurchase(context.Context, *CreatePurchaseRequest) (*CreatePurchaseResponse, error)
+	CreatePurchase(context.Context, *CreatePurchaseRequest) (*DescribePurchaseResponse, error)
+	UpdatePurchase(context.Context, *UpdatePurchaseRequest) (*DescribePurchaseResponse, error)
 	DescribePurchase(context.Context, *DescribePurchaseRequest) (*DescribePurchaseResponse, error)
 	ListPurchases(context.Context, *ListPurchasesRequest) (*ListPurchasesResponse, error)
 	RemovePurchase(context.Context, *RemovePurchaseRequest) (*emptypb.Empty, error)
+	MultiCreatePurchases(context.Context, *MultiCreatePurchaseRequest) (*MultiCreatePurchaseResponse, error)
 	mustEmbedUnimplementedPurchaseServiceServer()
 }
 
@@ -84,8 +106,11 @@ type PurchaseServiceServer interface {
 type UnimplementedPurchaseServiceServer struct {
 }
 
-func (UnimplementedPurchaseServiceServer) CreatePurchase(context.Context, *CreatePurchaseRequest) (*CreatePurchaseResponse, error) {
+func (UnimplementedPurchaseServiceServer) CreatePurchase(context.Context, *CreatePurchaseRequest) (*DescribePurchaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePurchase not implemented")
+}
+func (UnimplementedPurchaseServiceServer) UpdatePurchase(context.Context, *UpdatePurchaseRequest) (*DescribePurchaseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePurchase not implemented")
 }
 func (UnimplementedPurchaseServiceServer) DescribePurchase(context.Context, *DescribePurchaseRequest) (*DescribePurchaseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribePurchase not implemented")
@@ -95,6 +120,9 @@ func (UnimplementedPurchaseServiceServer) ListPurchases(context.Context, *ListPu
 }
 func (UnimplementedPurchaseServiceServer) RemovePurchase(context.Context, *RemovePurchaseRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemovePurchase not implemented")
+}
+func (UnimplementedPurchaseServiceServer) MultiCreatePurchases(context.Context, *MultiCreatePurchaseRequest) (*MultiCreatePurchaseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiCreatePurchases not implemented")
 }
 func (UnimplementedPurchaseServiceServer) mustEmbedUnimplementedPurchaseServiceServer() {}
 
@@ -123,6 +151,24 @@ func _PurchaseService_CreatePurchase_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PurchaseServiceServer).CreatePurchase(ctx, req.(*CreatePurchaseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PurchaseService_UpdatePurchase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePurchaseRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PurchaseServiceServer).UpdatePurchase(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PurchaseService/UpdatePurchase",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PurchaseServiceServer).UpdatePurchase(ctx, req.(*UpdatePurchaseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -181,6 +227,24 @@ func _PurchaseService_RemovePurchase_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PurchaseService_MultiCreatePurchases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiCreatePurchaseRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PurchaseServiceServer).MultiCreatePurchases(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PurchaseService/MultiCreatePurchases",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PurchaseServiceServer).MultiCreatePurchases(ctx, req.(*MultiCreatePurchaseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PurchaseService_ServiceDesc is the grpc.ServiceDesc for PurchaseService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -193,6 +257,10 @@ var PurchaseService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PurchaseService_CreatePurchase_Handler,
 		},
 		{
+			MethodName: "UpdatePurchase",
+			Handler:    _PurchaseService_UpdatePurchase_Handler,
+		},
+		{
 			MethodName: "DescribePurchase",
 			Handler:    _PurchaseService_DescribePurchase_Handler,
 		},
@@ -203,6 +271,10 @@ var PurchaseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemovePurchase",
 			Handler:    _PurchaseService_RemovePurchase_Handler,
+		},
+		{
+			MethodName: "MultiCreatePurchases",
+			Handler:    _PurchaseService_MultiCreatePurchases_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

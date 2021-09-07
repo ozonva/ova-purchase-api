@@ -1,35 +1,40 @@
 package main
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
-	db2 "github.com/ozonva/ova-purchase-api/internal/db"
-	"github.com/ozonva/ova-purchase-api/internal/repo"
-	"github.com/ozonva/ova-purchase-api/internal/server"
+	app2 "github.com/ozonva/ova-purchase-api/internal/app"
+	"github.com/ozonva/ova-purchase-api/internal/config"
 	"github.com/rs/zerolog/log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal().Msgf("Failed to load env file %v", err)
+		log.Fatal().Err(err).Msg("Failed to load env file")
 	}
-	url := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s",
-		os.Getenv("DB_USERNAME"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_NAME"),
-	)
-	db, err := db2.NewDB(url)
-
+	configuration, err := config.LoadConfiguration("config/application.yml")
 	if err != nil {
-		log.Fatal().Msgf("Failed to create connection to db %v", err)
+		log.Fatal().Err(err).Msg("Failed to load configuration")
 	}
-	purchaseServer := server.NewPurchaseServer(repo.NewRepo(db))
 
-	server := server.NewServer(purchaseServer, 81, 8181)
-	server.Run()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+
+	control := make(chan struct{}, 1)
+	control <- struct{}{}
+
+	app := app2.NewApp(configuration)
+
+	for {
+		select {
+		case <-control:
+			app.Start()
+		case <-quit:
+			app.Stop()
+			return
+		}
+	}
 }

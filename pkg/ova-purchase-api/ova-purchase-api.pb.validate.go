@@ -122,114 +122,6 @@ var _ interface {
 	ErrorName() string
 } = CreatePurchaseRequestValidationError{}
 
-// Validate checks the field values on CreatePurchaseResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *CreatePurchaseResponse) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for Id
-
-	for idx, item := range m.GetItems() {
-		_, _ = idx, item
-
-		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return CreatePurchaseResponseValidationError{
-					field:  fmt.Sprintf("Items[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	// no validation rules for Total
-
-	if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CreatePurchaseResponseValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CreatePurchaseResponseValidationError{
-				field:  "UpdatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for Status
-
-	return nil
-}
-
-// CreatePurchaseResponseValidationError is the validation error returned by
-// CreatePurchaseResponse.Validate if the designated constraints aren't met.
-type CreatePurchaseResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CreatePurchaseResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CreatePurchaseResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CreatePurchaseResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CreatePurchaseResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CreatePurchaseResponseValidationError) ErrorName() string {
-	return "CreatePurchaseResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e CreatePurchaseResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCreatePurchaseResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CreatePurchaseResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CreatePurchaseResponseValidationError{}
-
 // Validate checks the field values on DescribePurchaseRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -736,6 +628,254 @@ var _ interface {
 	ErrorName() string
 } = RemovePurchaseRequestValidationError{}
 
+// Validate checks the field values on MultiCreatePurchaseRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *MultiCreatePurchaseRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if len(m.GetPurchases()) < 1 {
+		return MultiCreatePurchaseRequestValidationError{
+			field:  "Purchases",
+			reason: "value must contain at least 1 item(s)",
+		}
+	}
+
+	for idx, item := range m.GetPurchases() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return MultiCreatePurchaseRequestValidationError{
+					field:  fmt.Sprintf("Purchases[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MultiCreatePurchaseRequestValidationError is the validation error returned
+// by MultiCreatePurchaseRequest.Validate if the designated constraints aren't met.
+type MultiCreatePurchaseRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MultiCreatePurchaseRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MultiCreatePurchaseRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MultiCreatePurchaseRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MultiCreatePurchaseRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MultiCreatePurchaseRequestValidationError) ErrorName() string {
+	return "MultiCreatePurchaseRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MultiCreatePurchaseRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMultiCreatePurchaseRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MultiCreatePurchaseRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MultiCreatePurchaseRequestValidationError{}
+
+// Validate checks the field values on MultiCreatePurchaseResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *MultiCreatePurchaseResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// MultiCreatePurchaseResponseValidationError is the validation error returned
+// by MultiCreatePurchaseResponse.Validate if the designated constraints
+// aren't met.
+type MultiCreatePurchaseResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MultiCreatePurchaseResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MultiCreatePurchaseResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MultiCreatePurchaseResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MultiCreatePurchaseResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MultiCreatePurchaseResponseValidationError) ErrorName() string {
+	return "MultiCreatePurchaseResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MultiCreatePurchaseResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMultiCreatePurchaseResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MultiCreatePurchaseResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MultiCreatePurchaseResponseValidationError{}
+
+// Validate checks the field values on UpdatePurchaseRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdatePurchaseRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	if len(m.GetItems()) < 1 {
+		return UpdatePurchaseRequestValidationError{
+			field:  "Items",
+			reason: "value must contain at least 1 item(s)",
+		}
+	}
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UpdatePurchaseRequestValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// UpdatePurchaseRequestValidationError is the validation error returned by
+// UpdatePurchaseRequest.Validate if the designated constraints aren't met.
+type UpdatePurchaseRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdatePurchaseRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdatePurchaseRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdatePurchaseRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdatePurchaseRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdatePurchaseRequestValidationError) ErrorName() string {
+	return "UpdatePurchaseRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdatePurchaseRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdatePurchaseRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdatePurchaseRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdatePurchaseRequestValidationError{}
+
 // Validate checks the field values on CreatePurchaseRequest_Item with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
@@ -823,82 +963,6 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CreatePurchaseRequest_ItemValidationError{}
-
-// Validate checks the field values on CreatePurchaseResponse_Item with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *CreatePurchaseResponse_Item) Validate() error {
-	if m == nil {
-		return nil
-	}
-
-	// no validation rules for Id
-
-	// no validation rules for Name
-
-	// no validation rules for Price
-
-	// no validation rules for Quantity
-
-	return nil
-}
-
-// CreatePurchaseResponse_ItemValidationError is the validation error returned
-// by CreatePurchaseResponse_Item.Validate if the designated constraints
-// aren't met.
-type CreatePurchaseResponse_ItemValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CreatePurchaseResponse_ItemValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CreatePurchaseResponse_ItemValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CreatePurchaseResponse_ItemValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CreatePurchaseResponse_ItemValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CreatePurchaseResponse_ItemValidationError) ErrorName() string {
-	return "CreatePurchaseResponse_ItemValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e CreatePurchaseResponse_ItemValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCreatePurchaseResponse_Item.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CreatePurchaseResponse_ItemValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CreatePurchaseResponse_ItemValidationError{}
 
 // Validate checks the field values on DescribePurchaseResponse_Item with the
 // rules defined in the proto definition for this message. If any rules are
@@ -1048,3 +1112,98 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = Purchase_ItemValidationError{}
+
+// Validate checks the field values on UpdatePurchaseRequest_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdatePurchaseRequest_Item) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if m.GetId() <= 0 {
+		return UpdatePurchaseRequest_ItemValidationError{
+			field:  "Id",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 255 {
+		return UpdatePurchaseRequest_ItemValidationError{
+			field:  "Name",
+			reason: "value length must be between 1 and 255 runes, inclusive",
+		}
+	}
+
+	if m.GetPrice() <= 0 {
+		return UpdatePurchaseRequest_ItemValidationError{
+			field:  "Price",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	if m.GetQuantity() <= 0 {
+		return UpdatePurchaseRequest_ItemValidationError{
+			field:  "Quantity",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	return nil
+}
+
+// UpdatePurchaseRequest_ItemValidationError is the validation error returned
+// by UpdatePurchaseRequest_Item.Validate if the designated constraints aren't met.
+type UpdatePurchaseRequest_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdatePurchaseRequest_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdatePurchaseRequest_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdatePurchaseRequest_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdatePurchaseRequest_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdatePurchaseRequest_ItemValidationError) ErrorName() string {
+	return "UpdatePurchaseRequest_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdatePurchaseRequest_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdatePurchaseRequest_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdatePurchaseRequest_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdatePurchaseRequest_ItemValidationError{}

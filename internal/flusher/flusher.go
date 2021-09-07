@@ -30,7 +30,7 @@ func (s *flusher) Flush(purchases []purchase.Purchase) []purchase.Purchase {
 	}
 	result := make([]purchase.Purchase, 0)
 	for _, items := range batch {
-		if err := s.repo.AddPurchases(context.Background(), items); err != nil {
+		if _, err := s.repo.AddPurchases(context.Background(), items); err != nil {
 			result = append(result, items...)
 		}
 	}
