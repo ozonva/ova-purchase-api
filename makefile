@@ -13,7 +13,7 @@ run:
 
 .PHONY: lint
 lint:
-	GOBIN=$(LOCAL_BIN) golint ./...
+	golangci-lint run
 
 .PHONY: test
 test:
