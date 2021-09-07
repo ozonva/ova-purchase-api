@@ -52,10 +52,14 @@ func insertPurchase(ctx context.Context, tx *sqlx.Tx, purchase purchase.Purchase
 
 func (s *repo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) ([]uint64, error) {
 	tx, err := s.db.BeginTxx(ctx, nil)
-	ids := make([]uint64, 0, len(purchases))
 	if err != nil {
 		return nil, err
 	}
+
+	defer tx.Rollback()
+
+	ids := make([]uint64, 0, len(purchases))
+
 	for _, p := range purchases {
 		id, err := insertPurchase(ctx, tx, p)
 		if err != nil {
@@ -63,7 +67,8 @@ func (s *repo) AddPurchases(ctx context.Context, purchases []purchase.Purchase) 
 		}
 		ids = append(ids, id)
 	}
-	return ids, tx.Commit()
+	err = tx.Commit()
+	return ids, err
 }
 
 func (s *repo) AddPurchase(ctx context.Context, purchase purchase.Purchase) (uint64, error) {
@@ -71,11 +76,14 @@ func (s *repo) AddPurchase(ctx context.Context, purchase purchase.Purchase) (uin
 	if err != nil {
 		return 0, err
 	}
+	defer tx.Rollback()
+
 	id, err := insertPurchase(ctx, tx, purchase)
 	if err != nil {
 		return 0, err
 	}
-	return id, tx.Commit()
+	err = tx.Commit()
+	return id, err
 }
 
 func (s *repo) ListPurchases(ctx context.Context, limit, offset uint) ([]purchase.Purchase, error) {
@@ -180,6 +188,8 @@ func (s *repo) RemovePurchase(ctx context.Context, purchaseId uint64) error {
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
+
 	_, err = tx.ExecContext(ctx, `delete from purchase_items where purchase_id = $1`, purchaseId)
 	if err != nil {
 		return err
@@ -191,7 +201,8 @@ func (s *repo) RemovePurchase(ctx context.Context, purchaseId uint64) error {
 	if count, _ := result.RowsAffected(); count == 0 {
 		return PurchaseNotFoundError
 	}
-	return tx.Commit()
+	err = tx.Commit()
+	return err
 }
 
 func (s *repo) UpdatePurchase(ctx context.Context, purchase purchase.Purchase) error {
@@ -199,6 +210,8 @@ func (s *repo) UpdatePurchase(ctx context.Context, purchase purchase.Purchase) e
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
+
 	_, err = tx.ExecContext(ctx, `delete from purchase_items where purchase_id = $1`, purchase.Id)
 	if err != nil {
 		return err
@@ -217,5 +230,6 @@ func (s *repo) UpdatePurchase(ctx context.Context, purchase purchase.Purchase) e
 	if err != nil {
 		return err
 	}
-	return tx.Commit()
+	err = tx.Commit()
+	return err
 }
